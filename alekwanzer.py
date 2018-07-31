@@ -78,8 +78,8 @@ def print_samples(samples):
 
 def switch_sample_for_one_step(samples, step_seq_sounds, queue_for_sounds_dict):
     print_samples(samples)
-    sample_selected = input('\nEnter sample name...\n')
-    step_selected = int(input('\nEnter step that will play sample...\n'))
+    sample_selected = input('\nEnter sample name (example: kick01.wav)...\n')
+    step_selected = int(input('\nEnter step that will play sample (from 0 to 15)...\n'))
     step_seq_sounds[step_selected] = samples[sample_selected]
     queue_for_sounds_dict.put(step_seq_sounds)
 
@@ -87,13 +87,20 @@ def switch_bpm(bpm_queue):
     bpm = int(input('\nEnter new BPM pleasey...\n'))
     bpm_queue.put(bpm)
 
+def play_samples(samples):
+    print_samples(samples)
+    sample_selected = input('\nEnter sample name (example: kick01.wav)...\n')
+    channel = pygame.mixer.find_channel()
+    channel.play(samples[sample_selected])
+
 def sequencer_menu(samples, step_seq_sounds, queue_for_sounds_dict, start_stop_queue, bpm_queue):
     while True:
         print('\nActions:\n\n'
               '1. Start and stop sequencer\n'
               '2. Show sequencer\'s load\n'
               '3. Switch with available samples\n'
-              '4. Update BPM for more fun\n')
+              '4. Update BPM for more fun\n'
+              '5. Listen to samples\n')
         action = int(input('\n\nWaiting for input dear...\n'))
         if action == 1:
             start_stop_queue.put(action)
@@ -103,12 +110,18 @@ def sequencer_menu(samples, step_seq_sounds, queue_for_sounds_dict, start_stop_q
             switch_sample_for_one_step(samples, step_seq_sounds, queue_for_sounds_dict)
         elif action == 4:
             switch_bpm(bpm_queue)
+        elif action == 5:
+            play_samples(samples)
 
-def main():
+def init_pygame_module():
     pygame.mixer.init(44100, -16, 2, 1024)
     pygame.mixer.set_num_channels(32)
     pygame.init()
+
+def main():
+    init_pygame_module()
     clear_screen()
+
     bpm_queue = queue.Queue()
     bpm = input('Give me a BPM, I will create a party...\n\n')
     bpm_queue.put(bpm)
@@ -127,7 +140,6 @@ def main():
 
     menu_thread = threading.Thread(target=sequencer_menu, args=(samples, step_seq_sounds, queue_for_sounds_dict, start_stop_queue, bpm_queue))
     menu_thread.start()
-    menu_thread.join()
 
 if __name__ == '__main__':
     main()
