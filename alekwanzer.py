@@ -11,25 +11,38 @@ def sleep_time_calculation(bpm, time_spent_for_sound_play):
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def set_sounds_dict(step_seq_sounds, samples):
+def set_sounds_dict_preset_1(samples):
     kick01 = samples['kick01.wav']
+    step_seq_sound = {}
     for i in range(16):
-        step_seq_sounds[i] = None
-    step_seq_sounds[0] = kick01
-    step_seq_sounds[4] = kick01
-    step_seq_sounds[8] = kick01
-    step_seq_sounds[12] = kick01
-    return step_seq_sounds
+        step_seq_sound[i] = None
+    step_seq_sound[0] = kick01
+    step_seq_sound[4] = kick01
+    step_seq_sound[8] = kick01
+    step_seq_sound[12] = kick01
+    return step_seq_sound
+
+def set_sounds_dict_preset_2(samples):
+    hat = samples['hat 10.wav']
+    step_seq_sound = {}
+    for i in range(16):
+        step_seq_sound[i] = None
+    step_seq_sound[0] = hat
+    step_seq_sound[4] = hat
+    step_seq_sound[8] = hat
+    step_seq_sound[12] = hat
+    return step_seq_sound
 
 def play_one_step(bpm, step_seq_sounds, step):
-    if step_seq_sounds[step]:
-        start_time = time.time()
-        channel = pygame.mixer.find_channel()
-        channel.play(step_seq_sounds[step])
-        end_time = time.time()
-        time_delta = end_time - start_time
-    else:
-        time_delta = None
+    for step_seq_sound in step_seq_sounds:
+        if step_seq_sound[step]:
+            start_time = time.time()
+            channel = pygame.mixer.find_channel()
+            channel.play(step_seq_sound[step])
+            end_time = time.time()
+            time_delta = end_time - start_time
+        else:
+            time_delta = None
 
     time.sleep(sleep_time_calculation(bpm, time_delta))
 
@@ -56,7 +69,7 @@ def sequencer(bpm_queue, queue_for_sounds_dict, start_stop_queue):
 
 def print_step_seq_state(step_seq_sounds):
     print('Samples loaded on sequencer:\n')
-    for step, sample in step_seq_sounds.items():
+    for step, sample in step_seq_sounds[0].items():
         if not sample is None:
             print('STEP ' + str(step) + ' CONTAINS SAMPLE')
         else:
@@ -80,7 +93,7 @@ def switch_sample_for_one_step(samples, step_seq_sounds, queue_for_sounds_dict):
     print_samples(samples)
     sample_selected = input('\nEnter sample name (example: kick01.wav)...\n')
     step_selected = int(input('\nEnter step that will play sample (from 0 to 15)...\n'))
-    step_seq_sounds[step_selected] = samples[sample_selected]
+    step_seq_sounds[0][step_selected] = samples[sample_selected]
     queue_for_sounds_dict.put(step_seq_sounds)
 
 def switch_bpm(bpm_queue):
@@ -127,9 +140,10 @@ def main():
     bpm_queue.put(bpm)
 
     print('Adding default samples on sequencer...\n\n')
-    step_seq_sounds = {}
+    step_seq_sounds = []
     samples = discover_and_load_samples('lo_fi_drum_kit')
-    step_seq_sounds = set_sounds_dict(step_seq_sounds, samples)
+    step_seq_sounds.append(set_sounds_dict_preset_1(samples))
+    step_seq_sounds.append(set_sounds_dict_preset_2(samples))
     queue_for_sounds_dict = queue.Queue()
     start_stop_queue = queue.Queue()
     queue_for_sounds_dict.put(step_seq_sounds)
