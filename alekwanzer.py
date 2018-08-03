@@ -21,9 +21,9 @@ def set_sounds_dict_preset_2(samples):
     hat = samples['hat 10.wav']
     step_seq_sound = sekwanzer.init_16_step_sequencer()
     step_seq_sound[0] = hat
-    step_seq_sound[4] = hat
+    #step_seq_sound[4] = hat
     step_seq_sound[8] = hat
-    step_seq_sound[12] = hat
+    #step_seq_sound[12] = hat
     return step_seq_sound
 
 def discover_and_load_samples(samples_path):

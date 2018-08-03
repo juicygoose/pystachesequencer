@@ -1,3 +1,6 @@
+import pygame
+from copy import deepcopy
+
 def print_step_seq_state(step_seq_sounds):
     for step_seq_sound in step_seq_sounds:
         print('\nSamples loaded on sequencer:\n')
@@ -27,6 +30,19 @@ def switch_bpm(bpm_queue):
     bpm = int(input('\nEnter new BPM pleasey...\n'))
     bpm_queue.put(bpm)
 
+def save_pattern_from_active_sequencer(active_sequencer, step_seq_sounds, saved_patterns):
+    pattern_to_save = dict(step_seq_sounds[active_sequencer])
+    saved_patterns = [] # Clear that for now as we want only one pattern saved
+    saved_patterns.append(pattern_to_save)
+    print('Pattern from sequencer {} has been saved!'.format(str(active_sequencer)))
+    return saved_patterns
+
+def play_pattern_on_active_sequencer(active_sequencer, step_seq_sounds, saved_patterns, queue_for_sounds_dict):
+    if saved_patterns:
+        step_seq_sounds[active_sequencer] = saved_patterns[0]
+        queue_for_sounds_dict.put(step_seq_sounds)
+        print('Saved pattern is now active on sequencer {}'.format(str(active_sequencer)))
+
 def play_samples(samples):
     samples_dict = print_samples(samples)
     sample_selected = int(input('\nEnter sample number...\n'))
@@ -35,15 +51,20 @@ def play_samples(samples):
 
 def sequencer_menu(samples, step_seq_sounds, queue_for_sounds_dict, start_stop_queue, bpm_queue):
     active_sequencer = 0
+    saved_patterns = []
     while True:
-        print('\nActions:\n\n'
-              '1. Start and stop sequencer\n'
-              '2. Show all sequencers state\n'
-              '3. Switch with available samples\n'
-              '4. Update BPM for more fun\n'
-              '5. Listen to samples\n'
-              '6. Switch active sequencer\n')
-        action = int(input('\n\nWaiting for input dear...\n'))
+        print('\n-----------------------------------\n'
+              '| Actions:\n|\n'
+              '| 1. Start and stop sequencer\n'
+              '| 2. Show all sequencers state\n'
+              '| 3. Switch with available samples\n'
+              '| 4. Update BPM for more fun\n'
+              '| 5. Listen to samples\n'
+              '| 6. Switch active sequencer\n'
+              '| 7. Save pattern from active sequencer\n'
+              '| 8. Play pattern on active sequencer\n|')
+        action = int(input('| Waiting for input dear...\n'
+                           '------------------------------------\n'))
         if action == 1:
             start_stop_queue.put(action)
         elif action == 2:
@@ -61,3 +82,7 @@ def sequencer_menu(samples, step_seq_sounds, queue_for_sounds_dict, start_stop_q
             else:
                 active_sequencer = 0
                 print('\nActive sequencer is now seq 0')
+        elif action == 7:
+            saved_patterns = save_pattern_from_active_sequencer(active_sequencer, step_seq_sounds, saved_patterns)
+        elif action == 8:
+            play_pattern_on_active_sequencer(active_sequencer, step_seq_sounds, saved_patterns, queue_for_sounds_dict)
