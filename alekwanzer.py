@@ -35,6 +35,7 @@ def discover_and_load_samples(samples_path):
     return samples_dict
 
 def init_pygame_module():
+    # Maybe these figures will be changed when working on raspberry pi
     pygame.mixer.init(44100, -16, 2, 1024)
     pygame.mixer.set_num_channels(32)
     pygame.init()
@@ -51,7 +52,7 @@ def main():
     bpm = input('Give me a BPM, I will create a party...\n\n')
     bpm_queue.put(bpm)
 
-    print('Adding default samples on sequencer...\n\n')
+    print('\nAdding default samples on sequencer...\n')
     step_seq_sounds = []
     samples = discover_and_load_samples('lo_fi_drum_kit')
 
